@@ -152,20 +152,25 @@ fi
 if [ ! "$(docker images | grep centos7)" ]; then
   echo "Pulling container images for CentOS"
   $NOOP docker pull centos
+else
+  echo "Container images for CentOS are already pulled"
 fi
 
-exit 0
-
-if [ ! "$(sudo docker images | grep 'gildas/puppetbase')" ]; then
-  if [ "$(sudo docker search 'gildas/puppetbase')" ]; then
+if [ ! "$(docker images | grep 'gildas/puppetbase')" ]; then
+  if [ "$(docker search 'gildas/puppetbase'| grep 'gildas/puppetbase')" ]; then
     echo "Pulling container images for Puppet Base from github.com/gildas"
-    $NOOP sudo docker pull gildas/puppetbase
+    $NOOP docker pull gildas/puppetbase
   else
-    echo "Building container: puppetbase"
-    $NOOP sudo docker build -t="gildas/puppetbase" .
+    echo "Fetching definition for container puppetbase"
+    $NOOP curl -sSL https://github.com/gildas/docker-puppetbase/raw/master/Dockerfile --output Dockerfile
 
-    echo "Publishing container: puppetbase"
-    $NOOP sudo docker push gildas/puppetbase
+    echo "Building container puppetbase"
+    $NOOP docker build -t="gildas/puppetbase" .
+
+    echo "Publishing container puppetbase"
+    $NOOP docker push gildas/puppetbase
   fi
+else
+  echo "Container images for puppet are already pulled"
 fi
 # }}}
