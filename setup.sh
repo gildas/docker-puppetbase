@@ -80,7 +80,6 @@ case "$(uname -m)" in
     ;;
 esac
 
-echo "You need to be a sudoer and will have to enter your password once during this script."
 [[ ! -z "$NOOP" ]] && echo "Running in dry mode (no command will be executed)"
 
 # Loads the distro information
@@ -93,6 +92,7 @@ echo "Running on $NAME release $VERSION"
 if has_application docker || has_application lxc-docker ; then
   echo "Docker is already installed on this system"
 else
+  echo "You need to be a sudoer and will have to enter your password once during this script."
   if [ "$ID" == "centos" ]; then
     if [ "$VERSION_ID" == "7" ]; then
       #if [ ! $(rpm -qa | grep docker) ]; then
