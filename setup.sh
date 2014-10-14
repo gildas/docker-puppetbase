@@ -7,12 +7,12 @@ if [ ! $(rpm -qa | grep docker) ]; then
   sudo yum install docker
 fi
 
-if [ "$(systemctl is-enabled docker)" -ne ' enabled' ]; then
+if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
   echo "Enabling Docker service"
   sudo systemctl enable docker
 fi
 
-if [ "$(systemctl is-active docker)" -ne ' active' ]; then
+if [ "$(systemctl is-active docker)" != 'active' ]; then
   echo "Starting Docker"
   sudo systemctl start docker
 fi
