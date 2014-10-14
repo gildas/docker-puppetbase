@@ -25,6 +25,16 @@ function verbose() # {{{
   [[ ${VERBOSE:-0} -eq 0 ]] || printf "$*\n";
 } # }}}
 
+function error() # {{{
+{
+  echo >&2 "$@"
+} # }}}
+
+function has_application() # {{{
+{
+  command -v "$@" > /dev/null 2>&1
+} # }}}
+
 function parse_args() # {{{
 {
   flags=()
@@ -61,40 +71,78 @@ function parse_args() # {{{
 # Main {{{
 parse_args "$@"
 
+case "$(uname -m)" in
+  *64) ;;
+  *)
+    error 'This operating system is not a 64 bit platform'
+    error 'Docker currently support only 64 bit platforms'
+    exit 1
+    ;;
+esac
+
 echo "You need to be a sudoer and will have to enter your password once during this script."
 [[ ! -z "$NOOP" ]] && echo "Running in dry mode (no command will be executed)"
 
 # Loads the distro information
 debug "Loading distribution information"
-source /etc/*-release
+source /etc/os-release
+[[ -r /etc/lsb-release ]] && source /etc/lsb-release
+echo "Running on $NAME release $VERSION"
 debug "Done"
 
-if [ "$ID" == "centos" ]; then
-  echo "Running on $NAME release $VERSION"
-  if [ "$VERSION_ID" == "7" ]; then
-    if [ ! $(rpm -qa | grep docker) ]; then
+if has_application docker || has_application lxc-docker ; then
+  echo "Docker is already installed on this system"
+else
+  if [ "$ID" == "centos" ]; then
+    if [ "$VERSION_ID" == "7" ]; then
+      if [ ! $(rpm -qa | grep docker) ]; then
+        echo "Installing Docker"
+        $NOOP sudo yum update
+        $NOOP sudo yum install docker
+      fi
+
+      if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
+        echo "Enabling Docker service"
+        $NOOP sudo systemctl enable docker
+      fi
+
+      if [ "$(systemctl is-active docker)" != 'active' ]; then
+        echo "Starting Docker"
+        $NOOP sudo systemctl start docker
+      fi
+    else
+      echo "We are very sorry, but we cannot complete the automatic installation as this version of $NAME is not yet supported."
+      exit 1
+    fi
+  elif [ "$ID" == 'ubuntu' ]; then
+    if [ "$VERSION_ID" == '14.04' ]; then
       echo "Installing Docker"
-      $NOOP sudo yum install docker
-    fi
+      $NOOP sudo apt-get --assume-yes update
+      $NOOP sudo apt-get --assume-yes install docker.io
+      $NOOP sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
-    if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
-      echo "Enabling Docker service"
-      $NOOP sudo systemctl enable docker
-    fi
+      if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
+        echo "Enabling Docker service"
+        $NOOP sudo update-rc.d docker.io defaults
+      fi
 
-    if [ "$(systemctl is-active docker)" != 'active' ]; then
-      echo "Starting Docker"
-      $NOOP sudo systemctl start docker
+      if [ -z "$(service docker.io status | grep running)" ]; then
+        echo "Starting Docker"
+        $NOOP sudo service docker.io start
+      fi
+    else
+      echo "We are very sorry, but we cannot complete the automatic installation as this version of $NAME is not yet supported."
+      exit 1
     fi
-
-    if [ -z "$(grep 'docker:.*:${whoami}' /etc/group)" ]; then
-      echo "Adding user ${whoami} to group docker"
-      sudo usermod -G docker ${whoami}
-    fi
+  else 
+    echo "We are very sorry, but we cannot complete the automatic installation as this operating system is not yet supported."
+    exit 1
   fi
-elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
-  echo "Running on $DISTRIB_DESCRIPTION ($DISTRIB_CODENAME)"
-  #if [ "$DISTRIB_RELEASE" == 
+fi
+
+if [ -z "$(grep 'docker:.*:${whoami}' /etc/group)" ]; then
+  echo "Adding user ${whoami} to group docker"
+  $NOOP sudo usermod -aG docker ${whoami}
 fi
 
 exit 0
