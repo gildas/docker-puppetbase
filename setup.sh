@@ -147,9 +147,11 @@ if [ -z $(grep "docker:.*:${whoami}" /etc/group) ]; then
   exit 0
 fi
 
+SLEEP=:
 if [ ! "$(docker images | grep centos7)" ]; then
   echo "Pulling container images for CentOS"
   $NOOP docker pull centos
+  SLEEP=
 else
   echo "Container images for CentOS are already pulled"
 fi
@@ -157,6 +159,9 @@ fi
 if [ ! "$(docker images | grep 'gildas/puppetbase')" ]; then
   if [ "$(docker search 'gildas/puppetbase'| grep 'gildas/puppetbase')" ]; then
     echo "Pulling container images for Puppet Base from github.com/gildas"
+    # We need to sleep a little as we cannot issues docker pull/push too close to each other
+    # Or, we get some HTTP Error 504.
+    $SLEEP sleep 2
     $NOOP docker pull gildas/puppetbase:production
   else
     echo "Fetching definition for container puppetbase"
