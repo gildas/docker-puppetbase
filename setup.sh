@@ -4,8 +4,8 @@ shopt -s extglob
 set -o errtrace
 set +o noclobber
 
-export VERBOSE=1
-export DEBUG=1
+#export VERBOSE=1
+#export DEBUG=1
 export NOOP=
 
 whoami=$(whoami)
@@ -84,11 +84,11 @@ echo "You need to be a sudoer and will have to enter your password once during t
 [[ ! -z "$NOOP" ]] && echo "Running in dry mode (no command will be executed)"
 
 # Loads the distro information
-debug "Loading distribution information"
+debug "Loading distribution information..."
 source /etc/os-release
 [[ -r /etc/lsb-release ]] && source /etc/lsb-release
+debug "Done\n"
 echo "Running on $NAME release $VERSION"
-debug "Done"
 
 if has_application docker || has_application lxc-docker ; then
   echo "Docker is already installed on this system"
@@ -140,7 +140,7 @@ else
   fi
 fi
 
-if [ -z "$(grep 'docker:.*:${whoami}' /etc/group)" ]; then
+if [ -z $(grep "docker:.*:${whoami}" /etc/group) ]; then
   echo "Adding user ${whoami} to group docker"
   $NOOP sudo usermod -aG docker ${whoami}
 fi
