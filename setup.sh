@@ -39,6 +39,7 @@ function parse_args() # {{{
 	;;
       (--noop)
         export NOOP=:
+        ;;
       (--debug)
         export DEBUG=1
         flags+=( "$arg" )
@@ -56,10 +57,15 @@ function parse_args() # {{{
 } # }}}
 
 # Main {{{
+parse_args "$@"
+
 echo "You need to be a sudoer and will have to enter your password once during this script."
+[[ ! -z "$NOOP" ]] && echo "Running in dry mode (no command will be executed)"
 
 # Loads the distro information
+debug "Loading distribution information"
 source /etc/*-release
+debug "Done"
 
 if [ "$ID" == "centos" ]; then
   echo "Running on $NAME release $VERSION"
@@ -85,7 +91,7 @@ elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
 fi
 
 if [ ! "$(sudo docker images | grep centos7)" ]; then
-  echo "Puller container images for CentOS"
+  echo "Pulling container images for CentOS"
   $NOOP sudo docker pull centos
 fi
 
