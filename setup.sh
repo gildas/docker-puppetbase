@@ -8,6 +8,8 @@ export VERBOSE=1
 export DEBUG=1
 export NOOP=
 
+whoami=$(whoami)
+
 function log() # {{{
 {
   printf "%b\n" "$*";
@@ -83,6 +85,11 @@ if [ "$ID" == "centos" ]; then
     if [ "$(systemctl is-active docker)" != 'active' ]; then
       echo "Starting Docker"
       $NOOP sudo systemctl start docker
+    fi
+
+    if [ -z "$(grep 'docker:.*:${whoami}' /etc/group)" ]; then
+      echo "Adding user ${whoami} to group docker"
+      sudo usermod -G docker ${whoami}
     fi
   fi
 elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
