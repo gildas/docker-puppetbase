@@ -149,9 +149,9 @@ if [ -z $(grep "docker:.*:${whoami}" /etc/group) ]; then
   exit 0
 fi
 
-if [ ! "$(sudo docker images | grep centos7)" ]; then
+if [ ! "$(docker images | grep centos7)" ]; then
   echo "Pulling container images for CentOS"
-  $NOOP sudo docker pull centos
+  $NOOP docker pull centos
 fi
 
 exit 0
