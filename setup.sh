@@ -95,11 +95,11 @@ if has_application docker || has_application lxc-docker ; then
 else
   if [ "$ID" == "centos" ]; then
     if [ "$VERSION_ID" == "7" ]; then
-      if [ ! $(rpm -qa | grep docker) ]; then
-        echo "Installing Docker"
-        $NOOP sudo yum --assumeyes update
-        $NOOP sudo yum --assumeyes install docker
-      fi
+      #if [ ! $(rpm -qa | grep docker) ]; then
+      echo "Updating the operating system (can take a while)"
+      $NOOP sudo yum --assumeyes --quiet update
+      echo "Installing Docker"
+      $NOOP sudo yum --assumeyes --quiet install docker
 
       if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
         echo "Enabling Docker service"
@@ -116,9 +116,11 @@ else
     fi
   elif [ "$ID" == 'ubuntu' ]; then
     if [ "$VERSION_ID" == '14.04' ]; then
+      #if [ ! $(dpkg --show --showformat='${Status}' docker.io) [; then
+      echo "Updating the operating system (can take a while)"
+      $NOOP sudo apt-get --assume-yes --quiet update
       echo "Installing Docker"
-      $NOOP sudo apt-get --assume-yes update
-      $NOOP sudo apt-get --assume-yes install docker.io
+      $NOOP sudo apt-get --assume-yes --quiet install docker.io
       $NOOP sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
       if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
