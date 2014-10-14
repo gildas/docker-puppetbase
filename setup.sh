@@ -1,5 +1,60 @@
 #!/usr/bin/env bash
 
+shopt -s extglob
+set -o errtrace
+set +o noclobber
+
+export VERBOSE=1
+export DEBUG=1
+export NOOP=
+
+function log()
+{
+  printf "%b\n" "$*";
+}
+
+function debug()
+{
+  [[ ${DEBUG:-0} -eq 0 ]] || printf "[debug] $#: $*";
+}
+
+function verbose()
+{
+  [[ ${VERBOSE:-0} -eq 0 ]] || printf "$*\n";
+}
+
+function parse_args()
+{
+  flags=()
+
+  while (( $# > 0 ))
+  do
+    arg="$1"
+    shift
+    case "$arg" in
+      (--trace)
+        set -o trace
+	TRACE=1
+	flags+=( "$arg" )
+	;;
+      (--noop)
+        export NOOP=:
+      (--debug)
+        export DEBUG=1
+        flags+=( "$arg" )
+        ;;
+      (--quiet)
+        export VERBOSE=0
+        flags+=( "$arg" )
+        ;;
+      (--verbose)
+        export VERBOSE=1
+        flags+=( "$arg" )
+        ;;
+    esac
+  done
+}
+
 echo "You need to be a sudoer and will have to enter your password once during this script."
 
 # Loads the distro information
@@ -10,17 +65,17 @@ if [ "$ID" == "centos" ]; then
   if [ "$VERSION_ID" == "7" ]; then
     if [ ! $(rpm -qa | grep docker) ]; then
       echo "Installing Docker"
-      sudo yum install docker
+      $NOOP sudo yum install docker
     fi
 
     if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
       echo "Enabling Docker service"
-      sudo systemctl enable docker
+      $NOOP sudo systemctl enable docker
     fi
 
     if [ "$(systemctl is-active docker)" != 'active' ]; then
       echo "Starting Docker"
-      sudo systemctl start docker
+      $NOOP sudo systemctl start docker
     fi
   fi
 elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
@@ -30,19 +85,19 @@ fi
 
 if [ ! "$(sudo docker images | grep centos7)" ]; then
   echo "Puller container images for CentOS"
-  sudo docker pull centos
+  $NOOP sudo docker pull centos
 fi
 
 if [ ! "$(sudo docker images | grep 'gildas/puppetbase')" ]; then
   if [ "$(sudo docker search 'gildas/puppetbase')" ]; then
     echo "Pulling container images for Puppet Base from github.com/gildas"
-    sudo docker pull gildas/puppetbase
+    $NOOP sudo docker pull gildas/puppetbase
   else
     echo "Building container: puppetbase"
-    sudo docker build -t="gildas/puppetbase" .
+    $NOOP sudo docker build -t="gildas/puppetbase" .
 
     echo "Publishing container: puppetbase"
-    sudo docker push gildas/puppetbase
+    $NOOP sudo docker push gildas/puppetbase
   fi
 fi
 
