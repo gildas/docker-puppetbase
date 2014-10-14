@@ -97,8 +97,8 @@ else
     if [ "$VERSION_ID" == "7" ]; then
       if [ ! $(rpm -qa | grep docker) ]; then
         echo "Installing Docker"
-        $NOOP sudo yum update
-        $NOOP sudo yum install docker
+        $NOOP sudo yum --assumeyes update
+        $NOOP sudo yum --assumeyes install docker
       fi
 
       if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
