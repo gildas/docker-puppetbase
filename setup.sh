@@ -97,6 +97,8 @@ elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
   #if [ "$DISTRIB_RELEASE" == 
 fi
 
+exit 0
+
 if [ ! "$(sudo docker images | grep centos7)" ]; then
   echo "Pulling container images for CentOS"
   $NOOP sudo docker pull centos
