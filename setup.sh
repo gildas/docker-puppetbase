@@ -145,14 +145,16 @@ fi
 if [ -z $(grep "docker:.*:${whoami}" /etc/group) ]; then
   echo "Adding user ${whoami} to group docker"
   $NOOP sudo usermod -aG docker ${whoami}
+  echo "You need to logout and log back in and execute this script again"
+  exit 0
 fi
-
-exit 0
 
 if [ ! "$(sudo docker images | grep centos7)" ]; then
   echo "Pulling container images for CentOS"
   $NOOP sudo docker pull centos
 fi
+
+exit 0
 
 if [ ! "$(sudo docker images | grep 'gildas/puppetbase')" ]; then
   if [ "$(sudo docker search 'gildas/puppetbase')" ]; then
