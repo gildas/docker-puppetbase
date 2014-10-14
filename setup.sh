@@ -162,7 +162,11 @@ if [ ! "$(docker images | grep 'gildas/puppetbase')" ]; then
     $NOOP docker pull gildas/puppetbase
   else
     echo "Fetching definition for container puppetbase"
-    $NOOP curl -sSL https://github.com/gildas/docker-puppetbase/raw/master/Dockerfile --output Dockerfile
+    if [ -d .git ] ; then
+      git pull
+    else
+      $NOOP curl -sSL https://github.com/gildas/docker-puppetbase/raw/master/Dockerfile --output Dockerfile
+    fi
 
     echo "Building container puppetbase"
     $NOOP docker build -t="gildas/puppetbase" .
