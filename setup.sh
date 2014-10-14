@@ -159,7 +159,7 @@ fi
 if [ ! "$(docker images | grep 'gildas/puppetbase')" ]; then
   if [ "$(docker search 'gildas/puppetbase'| grep 'gildas/puppetbase')" ]; then
     echo "Pulling container images for Puppet Base from github.com/gildas"
-    $NOOP docker pull gildas/puppetbase
+    $NOOP docker pull gildas/puppetbase:production
   else
     echo "Fetching definition for container puppetbase"
     if [ -d .git ] ; then
