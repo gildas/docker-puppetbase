@@ -8,22 +8,22 @@ export VERBOSE=1
 export DEBUG=1
 export NOOP=
 
-function log()
+function log() # {{{
 {
   printf "%b\n" "$*";
-}
+} # }}}
 
-function debug()
+function debug() # {{{
 {
   [[ ${DEBUG:-0} -eq 0 ]] || printf "[debug] $#: $*";
-}
+} # }}}
 
-function verbose()
+function verbose() # {{{
 {
   [[ ${VERBOSE:-0} -eq 0 ]] || printf "$*\n";
-}
+} # }}}
 
-function parse_args()
+function parse_args() # {{{
 {
   flags=()
 
@@ -53,8 +53,9 @@ function parse_args()
         ;;
     esac
   done
-}
+} # }}}
 
+# Main {{{
 echo "You need to be a sudoer and will have to enter your password once during this script."
 
 # Loads the distro information
@@ -100,4 +101,4 @@ if [ ! "$(sudo docker images | grep 'gildas/puppetbase')" ]; then
     $NOOP sudo docker push gildas/puppetbase
   fi
 fi
-
+# }}}
