@@ -7,23 +7,23 @@ if [ ! $(rpm -qa | grep docker) ]; then
   sudo yum install docker
 fi
 
-if [ $(systemctl is-enabled docker) -ne ' enabled' ]; then
+if [ "$(systemctl is-enabled docker)" -ne ' enabled' ]; then
   echo "Enabling Docker service"
   sudo systemctl enable docker
 fi
 
-if [ $(systemctl is-active docker) -ne ' active' ]; then
+if [ "$(systemctl is-active docker)" -ne ' active' ]; then
   echo "Starting Docker"
   sudo systemctl start docker
 fi
 
-if [ ! $(sudo docker images | grep centos7) ]; then
+if [ ! "$(sudo docker images | grep centos7)" ]; then
   echo "Puller container images for CentOS"
   sudo docker pull centos
 fi
 
-if [ ! $(sudo docker images | grep 'gildas/puppetbase') ]; then
-  if [ $(sudo docker search 'gildas/puppetbase') ]; then
+if [ ! "$(sudo docker images | grep 'gildas/puppetbase')" ]; then
+  if [ "$(sudo docker search 'gildas/puppetbase')" ]; then
     echo "Pulling container images for Puppet Base from github.com/gildas"
     sudo docker pull gildas/puppetbase
   else
