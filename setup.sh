@@ -123,10 +123,8 @@ else
       $NOOP sudo apt-get --assume-yes --quiet install docker.io
       $NOOP sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
-      if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
-        echo "Enabling Docker service"
-        $NOOP sudo update-rc.d docker.io defaults
-      fi
+      echo "Enabling Docker service"
+      $NOOP sudo update-rc.d docker.io defaults
 
       if [ -z "$(service docker.io status | grep running)" ]; then
         echo "Starting Docker"
