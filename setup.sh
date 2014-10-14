@@ -2,19 +2,30 @@
 
 echo "You need to be a sudoer and will have to enter your password once during this script."
 
-if [ ! $(rpm -qa | grep docker) ]; then
-  echo "Installing Docker"
-  sudo yum install docker
-fi
+# Loads the distro information
+source /etc/*-release
 
-if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
-  echo "Enabling Docker service"
-  sudo systemctl enable docker
-fi
+if [ "$ID" == "centos" ]; then
+  echo "Running on $NAME release $VERSION"
+  if [ "$VERSION_ID" == "7" ]; then
+    if [ ! $(rpm -qa | grep docker) ]; then
+      echo "Installing Docker"
+      sudo yum install docker
+    fi
 
-if [ "$(systemctl is-active docker)" != 'active' ]; then
-  echo "Starting Docker"
-  sudo systemctl start docker
+    if [ "$(systemctl is-enabled docker)" != 'enabled' ]; then
+      echo "Enabling Docker service"
+      sudo systemctl enable docker
+    fi
+
+    if [ "$(systemctl is-active docker)" != 'active' ]; then
+      echo "Starting Docker"
+      sudo systemctl start docker
+    fi
+  fi
+elif [ "$DISTRIB_ID" == 'Ubuntu' ]; then
+  echo "Running on $DISTRIB_DESCRIPTION ($DISTRIB_CODENAME)"
+  #if [ "$DISTRIB_RELEASE" == 
 fi
 
 if [ ! "$(sudo docker images | grep centos7)" ]; then
