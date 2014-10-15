@@ -173,6 +173,7 @@ if [ ! "$(docker images | grep 'gildas/puppetbase')" ]; then
 
     echo "Building container puppetbase"
     $NOOP docker build -t="gildas/puppetbase" .
+    $NOOP docker tag gildas/puppetbase gildas/puppetbase:production
 
     echo "Publishing container puppetbase"
     $NOOP docker push gildas/puppetbase
